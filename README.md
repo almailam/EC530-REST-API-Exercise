@@ -14,3 +14,5 @@ python3 drug_adverse_effects.py LIPITOR --limit 20
 User stories:
 - As a patient, I want to be able to check my medication list for any adverse effects.
 - As a doctor, I want to be able to check the number of reports of adverse effects for each medication.
+- As a doctor, I want an easy way to see important information about a given medication.
+- As a patient, I want to see the appropriate use of the medication as well as any notable interactions.
