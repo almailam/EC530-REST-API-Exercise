@@ -68,41 +68,53 @@ def main():
     )
     args = parser.parse_args()
 
+    limit = args.limit
     drug_name = args.drug
-    if not drug_name:
-        drug_name = input("Enter drug name: ").strip()
-    if not drug_name:
-        print("Error: Drug name is required.", file=sys.stderr)
-        sys.exit(1)
 
-    print(f"Fetching adverse effects for '{drug_name}' from FDA API...")
-    print("-" * 60)
+    while True:
+        if not drug_name:
+            drug_name = input("\nEnter drug name (or 'q' to quit): ").strip()
+        if not drug_name or drug_name.lower() == "q":
+            print("Quitting")
+            break
 
-    adverse_effects = fetch_adverse_effects(drug_name, limit=args.limit)
+        print(f"\nFetching adverse effects for '{drug_name}' from FDA API...")
+        print("-" * 60)
 
-    if not adverse_effects:
-        print(f"No adverse effects found for '{drug_name}'.")
+        adverse_effects = fetch_adverse_effects(drug_name, limit=limit)
+
+        if not adverse_effects:
+            print(f"No adverse effects found for '{drug_name}'.")
+            print(
+                "Tip: Try the exact brand/generic name (e.g., LIPITOR, ASPIRIN). "
+                "FAERS data often uses uppercase."
+            )
+            retry = input("Try another drug? (y/n): ").strip().lower()
+            if retry != "y":
+                break
+            drug_name = None
+            continue
+
+        print(f"\n{'ADVERSE EFFECTS FOR: ' + drug_name.upper():^60}")
+        print(f"{'Total unique adverse effects: ' + str(len(adverse_effects)):^60}")
+        print("=" * 60)
+        print(f"{'Adverse Effect':<45} {'Reports':>10}")
+        print("-" * 60)
+
+        for effect, count in adverse_effects:
+            display_name = effect.title() if effect.isupper() else effect
+            print(f"{display_name:<45} {count:>10,}")
+
+        print("=" * 60)
         print(
-            "Tip: Try the exact brand/generic name (e.g., LIPITOR, ASPIRIN). "
-            "FAERS data often uses uppercase."
+            "\nNote: Data from FDA FAERS (2004–present). Reports may list multiple "
+            "drugs per event; the specific drug causing each reaction is not identified."
         )
-        return
 
-    print(f"\n{'ADVERSE EFFECTS FOR: ' + drug_name.upper():^60}")
-    print(f"{'Total unique adverse effects: ' + str(len(adverse_effects)):^60}")
-    print("=" * 60)
-    print(f"{'Adverse Effect':<45} {'Reports':>10}")
-    print("-" * 60)
-
-    for effect, count in adverse_effects:
-        display_name = effect.title() if effect.isupper() else effect
-        print(f"{display_name:<45} {count:>10,}")
-
-    print("=" * 60)
-    print(
-        "\nNote: Data from FDA FAERS (2004–present). Reports may list multiple "
-        "drugs per event; the specific drug causing each reaction is not identified."
-    )
+        again = input("\nSearch another drug? (y/n): ").strip().lower()
+        if again != "y":
+            break
+        drug_name = None
 
 
 if __name__ == "__main__":
