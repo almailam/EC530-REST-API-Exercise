@@ -12,6 +12,8 @@ next_id = 1
 @app.post("/accounts")
 def create_account(username: str):
     """Create an account with the given username."""
+    if username in accounts.values():
+        raise HTTPException(status_code=409, detail="Username already exists")
     global next_id
     account_id = next_id
     accounts[account_id] = username
